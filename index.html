@@ -29,6 +29,15 @@
     <input type="text" id="buscaProduto" placeholder="Buscar produto..." onkeyup="filtrarProdutos()">
 
     <br><br>
+<div class="atalhos-categorias">
+    <button onclick="irParaCategoria('Combos')">🎁 Combos</button>
+    <button onclick="irParaCategoria('Salgados')">🥟 Salgados</button>
+    <button onclick="irParaCategoria('Doces e Sobremesas')">🍰 Doces</button>
+    <button onclick="irParaCategoria('Bebidas')">🥤 Bebidas</button>
+    <button onclick="irParaCategoria('Mercearia')">🛒 Mercearia</button>
+</div>
+
+<br>
 
     <h2>⭐ Destaques</h2>
     <div id="produtosDestaque"></div>
@@ -158,38 +167,39 @@ function carregarProdutosNaTela(){
         }
     }
 
-    var categorias = [
-        "Doces e Sobremesas",
-        "Salgados",
-        "Combos",
-        "Kits Festa",
-        "Bebidas",
-        "Mercearia"
-    ];
+   var categorias = [
+    "Combos",
+    "Salgados",
+    "Doces e Sobremesas",
+    "Bebidas",
+    "Mercearia",
+    "Kits Festa"
+];
 
-    for(var c = 0; c < categorias.length; c++){
-        var categoriaAtual = categorias[c];
+for(var c = 0; c < categorias.length; c++){
+    var categoriaAtual = categorias[c];
+    var idCategoria = categoriaAtual.replaceAll(" ", "-");
+
+    if(lista){
+        lista.innerHTML += "<h2 id='" + idCategoria + "'>" + categoriaAtual + "</h2>";
+    }
+
+    for(var i = 0; i < produtos.length; i++){
+        var produto = produtos[i];
+
+        if(!produtoDisponivel(produto)){
+            continue;
+        }
+
+        if(produto.categoria !== categoriaAtual){
+            continue;
+        }
 
         if(lista){
-            lista.innerHTML += "<h2>" + categoriaAtual + "</h2>";
+            lista.innerHTML += montarCardProduto(produto, "");
+              }
         }
-
-        for(var i = 0; i < produtos.length; i++){
-            var produto = produtos[i];
-
-            if(!produtoDisponivel(produto)){
-                continue;
-            }
-
-            if(produto.categoria !== categoriaAtual){
-                continue;
-            }
-
-            if(lista){
-                lista.innerHTML += montarCardProduto(produto, "");
-            }
-        }
-    }
+ }
 }
 function montarCardProduto(produto, icone){
     var descricao = produto.descricao || "";
@@ -446,18 +456,17 @@ for(var i = 0; i < carrinho.length; i++){
 localStorage.setItem("produtosSweetCake", JSON.stringify(produtos));
     window.open("https://wa.me/5519984152639?text=" + texto, "_blank");
 }
-function filtrarProdutos(){
-    var busca = document.getElementById("buscaProduto").value.toLowerCase();
-    var produtosTela = document.querySelectorAll(".produto");
+function irParaCategoria(categoria){
+    var id = categoria.replaceAll(" ", "-");
+    var elemento = document.getElementById(id);
 
-    for(var i = 0; i < produtosTela.length; i++){
-        var texto = produtosTela[i].innerText.toLowerCase();
-
-        if(texto.includes(busca)){
-            produtosTela[i].style.display = "block";
-        }else{
-            produtosTela[i].style.display = "none";
-        }
+    if(elemento){
+        elemento.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    }else{
+        alert("Categoria ainda não encontrada: " + categoria);
     }
 }
 
