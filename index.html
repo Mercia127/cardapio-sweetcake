@@ -446,8 +446,13 @@ data: new Date().toLocaleDateString("pt-BR"),
 
 localStorage.setItem("pedidosSweetCake", JSON.stringify(pedidos));
 
-db.collection("pedidos").add(novoPedido).then(function(){
-    alert("Pedido enviado com sucesso!");
+db.collection("pedidos").add(novoPedido)
+.then(function(){
+    alert("Pedido salvo no painel e enviado!");
+})
+.catch(function(error){
+    alert("Erro ao salvar pedido no painel: " + error.message);
+    console.log("ERRO FIREBASE PEDIDO:", error);
 });
 for(var i = 0; i < carrinho.length; i++){
     for(var j = 0; j < produtos.length; j++){
