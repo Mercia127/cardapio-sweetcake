@@ -50,6 +50,7 @@ button{
 <body>
 
 <h1>📋 Pedidos do Dia</h1>
+
 <input
 id="buscaTelefone"
 type="text"
@@ -62,6 +63,7 @@ style="width:300px;padding:10px;margin:10px 0;border-radius:8px;border:1px solid
 <hr>
 
 <div id="listaPedidos"></div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
@@ -72,32 +74,17 @@ const firebaseConfig = {
   projectId: "sweetcake-cardapio",
   storageBucket: "sweetcake-cardapio.firebasestorage.app",
   messagingSenderId: "69352116515",
-  appId: "1:69352116515:web:c02c6d3a5df9e6d9c4bc96"db.collection("pedidos").onSnapshot(function(snapshot){
-    var novosPedidos = [];
-
-    snapshot.forEach(function(doc){
-        var pedido = doc.data();
-        pedido.idFirebase = doc.id;
-        novosPedidos.push(pedido);
-    });
-
-    if(novosPedidos.length > quantidadePedidosAnterior && quantidadePedidosAnterior > 0){
-        tocarSomPedido();
-        alert("Novo pedido recebido!");
-    }
-
-    pedidos = novosPedidos;
-    quantidadePedidosAnterior = novosPedidos.length;
-    carregarPedidos();
-});
+  appId: "1:69352116515:web:c02c6d3a5df9e6d9c4bc96"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 </script>
+
 <script>
 var pedidos = [];
 var quantidadePedidosAnterior = 0;
+
 function carregarPedidos(){
     var lista = document.getElementById("listaPedidos");
     lista.innerHTML = "";
@@ -113,20 +100,20 @@ function carregarPedidos(){
         lista.innerHTML +=
             "<div class='pedido'>" +
             "<h2>Pedido #" + pedido.numero + "</h2>" +
-"<p><b>Data:</b> " + (pedido.data || "") + "</p>" +
-"<p><b>Horário:</b> " + (pedido.horario || "") + "</p>" +
-            "<p><b>Cliente:</b> " + pedido.nome + "</p>" +
-conteudo += "<p><b>Pedido do cliente:</b> #" + (pedido.pedidosCliente || 1) + "</p>"; 
-            "<p><b>Telefone:</b> " + pedido.telefone + "</p>" +
-            "<p><b>Tipo:</b> " + pedido.tipoEntrega + "</p>" +
-            "<p><b>Endereço:</b> " + pedido.endereco + "</p>" +
-            "<p><b>Pagamento:</b> " + pedido.pagamento + "</p>" +
-            "<p><b>Subtotal:</b> R$ " + pedido.subtotal + "</p>" +
-            "<p><b>Entrega:</b> R$ " + pedido.entrega + "</p>" +
-            "<h3>Total: R$ " + pedido.total + "</h3>" +
-            "<p class='status'>Status: " + pedido.status + "</p>" +
+            "<p><b>Data:</b> " + (pedido.data || "") + "</p>" +
+            "<p><b>Horário:</b> " + (pedido.horario || "") + "</p>" +
+            "<p><b>Cliente:</b> " + (pedido.nome || "") + "</p>" +
+            "<p><b>Pedido do cliente:</b> #" + (pedido.pedidosCliente || 1) + "</p>" +
+            "<p><b>Telefone:</b> " + (pedido.telefone || "") + "</p>" +
+            "<p><b>Tipo:</b> " + (pedido.tipoEntrega || "") + "</p>" +
+            "<p><b>Endereço:</b> " + (pedido.endereco || "") + "</p>" +
+            "<p><b>Pagamento:</b> " + (pedido.pagamento || "") + "</p>" +
+            "<p><b>Subtotal:</b> R$ " + (pedido.subtotal || "0,00") + "</p>" +
+            "<p><b>Entrega:</b> R$ " + (pedido.entrega || "0,00") + "</p>" +
+            "<h3>Total: R$ " + (pedido.total || "0,00") + "</h3>" +
+            "<p class='status'>Status: " + (pedido.status || "Recebido") + "</p>" +
             "<button onclick='verPedido(" + i + ")'>Ver</button>" +
-"<button onclick='abrirWhatsApp(" + i + ")'>WhatsApp</button>" +
+            "<button onclick='abrirWhatsApp(" + i + ")'>WhatsApp</button>" +
             "<button class='imprimir' onclick='imprimirPedido(" + i + ")'>Imprimir</button>" +
             "<button onclick='mudarStatus(" + i + ", \"Preparando\")'>Preparando</button>" +
             "<button onclick='mudarStatus(" + i + ", \"Entregue\")'>Entregue</button>" +
@@ -138,15 +125,15 @@ conteudo += "<p><b>Pedido do cliente:</b> #" + (pedido.pedidosCliente || 1) + "<
 function verPedido(index){
     var pedido = pedidos[index];
 
-    var texto = "Pedido #" + pedido.numero + "\n\n";
-texto += "Pedido #" + pedido.numero + "\n";
-texto += "Data: " + (pedido.data || "") + "\n";
-texto += "Horário: " + (pedido.horario || "") + "\n";
-    texto += "Cliente: " + pedido.nome + "\n";
-    texto += "Telefone: " + pedido.telefone + "\n";
-    texto += "Tipo: " + pedido.tipoEntrega + "\n";
-    texto += "Endereço: " + pedido.endereco + "\n";
-    texto += "Pagamento: " + pedido.pagamento + "\n\n";
+    var texto = "Pedido #" + pedido.numero + "\n";
+    texto += "Pedido do cliente: #" + (pedido.pedidosCliente || 1) + "\n";
+    texto += "Data: " + (pedido.data || "") + "\n";
+    texto += "Horário: " + (pedido.horario || "") + "\n";
+    texto += "Cliente: " + (pedido.nome || "") + "\n";
+    texto += "Telefone: " + (pedido.telefone || "") + "\n";
+    texto += "Tipo: " + (pedido.tipoEntrega || "") + "\n";
+    texto += "Endereço: " + (pedido.endereco || "") + "\n";
+    texto += "Pagamento: " + (pedido.pagamento || "") + "\n\n";
     texto += "Itens:\n";
 
     for(var i = 0; i < pedido.itens.length; i++){
@@ -170,15 +157,15 @@ function imprimirPedido(index){
     var conteudo = "";
     conteudo += "<h2>SWEETCAKE</h2>";
     conteudo += "<h3>Pedido #" + pedido.numero + "</h3>";
-conteudo += "<p><b>Data:</b> " + (pedido.data || "") + "</p>";
-conteudo += "<p><b>Horário:</b> " + (pedido.horario || "") + "</p>";
+    conteudo += "<p><b>Pedido do cliente:</b> #" + (pedido.pedidosCliente || 1) + "</p>";
+    conteudo += "<p><b>Data:</b> " + (pedido.data || "") + "</p>";
+    conteudo += "<p><b>Horário:</b> " + (pedido.horario || "") + "</p>";
     conteudo += "<hr>";
-    conteudo += "<p><b>Cliente:</b> " + pedido.nome + "</p>";
-"<p><b>Pedido do cliente:</b> #" + (pedido.pedidosCliente || 1) + "</p>";
-    conteudo += "<p><b>Telefone:</b> " + pedido.telefone + "</p>";
-    conteudo += "<p><b>Tipo:</b> " + pedido.tipoEntrega + "</p>";
-    conteudo += "<p><b>Endereço:</b> " + pedido.endereco + "</p>";
-    conteudo += "<p><b>Pagamento:</b> " + pedido.pagamento + "</p>";
+    conteudo += "<p><b>Cliente:</b> " + (pedido.nome || "") + "</p>";
+    conteudo += "<p><b>Telefone:</b> " + (pedido.telefone || "") + "</p>";
+    conteudo += "<p><b>Tipo:</b> " + (pedido.tipoEntrega || "") + "</p>";
+    conteudo += "<p><b>Endereço:</b> " + (pedido.endereco || "") + "</p>";
+    conteudo += "<p><b>Pagamento:</b> " + (pedido.pagamento || "") + "</p>";
     conteudo += "<hr>";
     conteudo += "<h3>Itens</h3>";
 
@@ -205,9 +192,16 @@ conteudo += "<p><b>Horário:</b> " + (pedido.horario || "") + "</p>";
 
 function mudarStatus(index, novoStatus){
     pedidos[index].status = novoStatus;
-    localStorage.setItem("pedidosSweetCake", JSON.stringify(pedidos));
+
+    if(pedidos[index].idFirebase){
+        db.collection("pedidos").doc(pedidos[index].idFirebase).update({
+            status: novoStatus
+        });
+    }
+
     carregarPedidos();
 }
+
 function tocarSomPedido(){
     var audio = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
     audio.volume = 1;
@@ -216,13 +210,12 @@ function tocarSomPedido(){
         alert("🔔 Novo pedido recebido!");
     });
 }
+
 function filtrarTelefone(){
     var busca = document.getElementById("buscaTelefone").value.toLowerCase();
-
     var pedidosTela = document.querySelectorAll(".pedido");
 
     for(var i = 0; i < pedidosTela.length; i++){
-
         var texto = pedidosTela[i].innerText.toLowerCase();
 
         if(texto.includes(busca)){
@@ -232,23 +225,38 @@ function filtrarTelefone(){
         }
     }
 }
-function abrirWhatsApp(index){
 
+function abrirWhatsApp(index){
     var pedido = pedidos[index];
 
-    var telefone = String(pedido.telefone || "")
-        .replace(/\D/g,'');
+    var telefone = String(pedido.telefone || "").replace(/\D/g,'');
 
     if(!telefone){
         alert("Telefone não informado");
         return;
     }
 
-    window.open(
-        "https://wa.me/55" + telefone,
-        "_blank"
-    );
+    window.open("https://wa.me/55" + telefone, "_blank");
 }
+
+db.collection("pedidos").onSnapshot(function(snapshot){
+    var novosPedidos = [];
+
+    snapshot.forEach(function(doc){
+        var pedido = doc.data();
+        pedido.idFirebase = doc.id;
+        novosPedidos.push(pedido);
+    });
+
+    if(novosPedidos.length > quantidadePedidosAnterior && quantidadePedidosAnterior > 0){
+        tocarSomPedido();
+        alert("Novo pedido recebido!");
+    }
+
+    pedidos = novosPedidos;
+    quantidadePedidosAnterior = novosPedidos.length;
+    carregarPedidos();
+});
 </script>
 
 </body>
