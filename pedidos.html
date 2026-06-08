@@ -72,7 +72,24 @@ const firebaseConfig = {
   projectId: "sweetcake-cardapio",
   storageBucket: "sweetcake-cardapio.firebasestorage.app",
   messagingSenderId: "69352116515",
-  appId: "1:69352116515:web:c02c6d3a5df9e6d9c4bc96"
+  appId: "1:69352116515:web:c02c6d3a5df9e6d9c4bc96"db.collection("pedidos").onSnapshot(function(snapshot){
+    var novosPedidos = [];
+
+    snapshot.forEach(function(doc){
+        var pedido = doc.data();
+        pedido.idFirebase = doc.id;
+        novosPedidos.push(pedido);
+    });
+
+    if(novosPedidos.length > quantidadePedidosAnterior && quantidadePedidosAnterior > 0){
+        tocarSomPedido();
+        alert("Novo pedido recebido!");
+    }
+
+    pedidos = novosPedidos;
+    quantidadePedidosAnterior = novosPedidos.length;
+    carregarPedidos();
+});
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -157,7 +174,7 @@ conteudo += "<p><b>Data:</b> " + (pedido.data || "") + "</p>";
 conteudo += "<p><b>Horário:</b> " + (pedido.horario || "") + "</p>";
     conteudo += "<hr>";
     conteudo += "<p><b>Cliente:</b> " + pedido.nome + "</p>";
-conteudo += "<p><b>Pedido do cliente:</b> #" + (pedido.pedidosCliente || 1) + "</p>";
+"<p><b>Pedido do cliente:</b> #" + (pedido.pedidosCliente || 1) + "</p>";
     conteudo += "<p><b>Telefone:</b> " + pedido.telefone + "</p>";
     conteudo += "<p><b>Tipo:</b> " + pedido.tipoEntrega + "</p>";
     conteudo += "<p><b>Endereço:</b> " + pedido.endereco + "</p>";
