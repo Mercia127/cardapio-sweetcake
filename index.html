@@ -113,92 +113,80 @@ var carrinho = [];
 var desconto = 0;
 var subtotalCarrinho = 0;
 var produtos = JSON.parse(localStorage.getItem("produtosSweetCake")) || [];
+
 db.collection("sistema").doc("produtos").get().then(function(doc){
     if(doc.exists){
-        var produtosFirebase = doc.data().lista || [];
-        var novo = JSON.stringify(produtosFirebase);
-        var atual = localStorage.getItem("produtosSweetCake") || "[]";
-if(novo !== atual && sessionStorage.getItem("produtosAtualizados") !== "sim"){
-    localStorage.setItem("produtosSweetCake", novo);
-    sessionStorage.setItem("produtosAtualizados", "sim");
-    location.reload();
-}
+        produtos = doc.data().lista || [];
+        localStorage.setItem("produtosSweetCake", JSON.stringify(produtos));
     }
+
+    carregarProdutosNaTela();
 });
-sessionStorage.removeItem("produtosAtualizados");
-console.log(produtos);
-var lista = document.getElementById("listaProdutosLoja");
-var destaque = document.getElementById("produtosDestaque");
-var promocaoDoDia = document.getElementById("promocaoDoDia");
-function produtoDisponivel(produto){
-    if(produto.ativo === false){
-        return false;
-    }
 
-    if(produto.estoque !== undefined && Number(produto.estoque) <= 0){
-        return false;
-    }
+function carregarProdutosNaTela(){
+    console.log(produtos);
 
-    return true;
-}
-if(lista){
-lista.innerHTML = "";
-}
-destaque.innerHTML = "";
-promocaoDoDia.innerHTML = "";
+    var lista = document.getElementById("listaProdutosLoja");
+    var destaque = document.getElementById("produtosDestaque");
+    var promocaoDoDia = document.getElementById("promocaoDoDia");
 
-for(var d = 0; d < produtos.length; d++){
-    if(produtos[d].destaque !== true){
-        continue;
-    }
-
-   if(!produtoDisponivel(produtos[d])){
-    continue;
-}
-if(produtos[d].estoque !== undefined && Number(produtos[d].estoque) <= 0){
-    continue;
-}
-    destaque.innerHTML += montarCardProduto(produtos[d], "⭐");
-}
-
-for(var p = 0; p < produtos.length; p++){
-    if(produtos[p].promocaoDia !== true){
-        continue;
-    }
-
-   if(!produtoDisponivel(produtos[p])){
-    continue;
-}
-
-    promocaoDoDia.innerHTML += montarCardProduto(produtos[p], "🔥");
-}
-
-var categorias = [
-    "Doces e Sobremesas",
-    "Salgados",
-    "Kits Festa",
-    "Bebidas"
-    "Mercearia"
-];
-
-for(var c = 0; c < categorias.length; c++){
-    var categoriaAtual = categorias[c];
-
-  if(lista){
-    lista.innerHTML += "<h2>" + categoriaAtual + "</h2>";
-}
-    for(var i = 0; i < produtos.length; i++){
-        var produto = produtos[i];
-
-      if(!produtoDisponivel(produto)){
-    continue;
-}
-        if(produto.categoria !== categoriaAtual){
-            continue;
+    function produtoDisponivel(produto){
+        if(produto.ativo === false){
+            return false;
         }
 
+        if(produto.estoque !== undefined && Number(produto.estoque) <= 0){
+            return false;
+        }
+
+        return true;
+    }
+
+    if(lista){ lista.innerHTML = ""; }
+    destaque.innerHTML = "";
+    promocaoDoDia.innerHTML = "";
+
+    for(var d = 0; d < produtos.length; d++){
+        if(produtos[d].destaque === true && produtoDisponivel(produtos[d])){
+            destaque.innerHTML += montarCardProduto(produtos[d], "⭐");
+        }
+    }
+
+    for(var p = 0; p < produtos.length; p++){
+        if(produtos[p].promocaoDia === true && produtoDisponivel(produtos[p])){
+            promocaoDoDia.innerHTML += montarCardProduto(produtos[p], "🔥");
+        }
+    }
+
+    var categorias = [
+        "Doces e Sobremesas",
+        "Salgados",
+        "Kits Festa",
+        "Bebidas",
+        "Mercearia"
+    ];
+
+    for(var c = 0; c < categorias.length; c++){
+        var categoriaAtual = categorias[c];
+
         if(lista){
-    lista.innerHTML += montarCardProduto(produto, "");
+            lista.innerHTML += "<h2>" + categoriaAtual + "</h2>";
+        }
+
+        for(var i = 0; i < produtos.length; i++){
+            var produto = produtos[i];
+
+            if(!produtoDisponivel(produto)){
+                continue;
+            }
+
+            if(produto.categoria !== categoriaAtual){
+                continue;
+            }
+
+            if(lista){
+                lista.innerHTML += montarCardProduto(produto, "");
+            }
         }
     }
 }
