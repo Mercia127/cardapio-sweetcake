@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Painel SweetCake</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    display:flex;
+    height:100vh;
+    background:#f8fafc;
+}
+
+.menu{
+    width:230px;
+    background:#1e293b;
+    padding:20px;
+    color:white;
+}
+
+.menu h2{
+    color:#fff;
+    margin-bottom:20px;
+}
+
+.menu button{
+    width:100%;
+    margin-bottom:10px;
+    padding:15px;
+    border:none;
+    border-radius:8px;
+    background:#e91e63;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
+
+.menu button:hover{
+    background:#c2185b;
+}
+
+.tela{
+    flex:1;
+}
+
+iframe{
+    width:100%;
+    height:100%;
+    border:none;
+}
+.piscando{
+    animation: piscar 1s infinite;
+    background:#dc2626 !important;
+}
+
+@keyframes piscar{
+    0%{ opacity:1; }
+    50%{ opacity:0.4; }
+    100%{ opacity:1; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="menu">
+    <h2>🍰 SweetCake</h2>
+
+<button id="btnPedidos" onclick="abrirPedidos()">📋 Pedidos do Dia</button>
+<button onclick="abrirTela('admin.html')">📦 Produtos / Admin</button>
+<button onclick="abrirTela('relatorios.html')">📊 Relatórios</button>
+<button onclick="abrirTela('index.html')">🛍️ Ver Cardápio</button>
+</div>
+
+<div class="tela">
+    <iframe id="telaSistema" src="pedidos.html"></iframe>
+</div>
+
+<script>
+var pedidosAnterior = JSON.parse(localStorage.getItem("pedidosSweetCake")) || [];
+var quantidadePedidosAnterior = pedidosAnterior.length;
+
+function abrirTela(pagina){
+    document.getElementById("telaSistema").src = pagina;
+}
+
+function abrirPedidos(){
+    document.getElementById("telaSistema").src = "pedidos.html";
+    document.getElementById("btnPedidos").classList.remove("piscando");
+    document.title = "Painel SweetCake";
+}
+
+function tocarSomPedido(){
+
+    var audio = new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg");
+    audio.volume = 1;
+    audio.play().catch(function(){});
+
+    setTimeout(function(){
+        var fala1 = new SpeechSynthesisUtterance("Um Novo pedido Chegou, Verifique Painel");
+        fala1.lang = "pt-BR";
+        fala1.volume = 1;
+        fala1.rate = 0.9;
+        speechSynthesis.speak(fala1);
+    }, 800);
+
+    setTimeout(function(){
+        var fala2 = new SpeechSynthesisUtterance("Um Novo pedido Chegou, Verifique Painel");
+        fala2.lang = "pt-BR";
+        fala2.volume = 1;
+        fala2.rate = 0.9;
+        speechSynthesis.speak(fala2);
+    }, 2800);
+
+    setTimeout(function(){
+        var fala3 = new SpeechSynthesisUtterance("Um Novo pedido Chegou, Verifique Painel");
+        fala3.lang = "pt-BR";
+        fala3.volume = 1;
+        fala3.rate = 0.9;
+        speechSynthesis.speak(fala3);
+    }, 4800);
+}
+function verificarNovoPedidoPainel(){
+    var pedidosAtualizados = JSON.parse(localStorage.getItem("pedidosSweetCake")) || [];
+
+    if(pedidosAtualizados.length > quantidadePedidosAnterior){
+        quantidadePedidosAnterior = pedidosAtualizados.length;
+
+        document.getElementById("btnPedidos").classList.add("piscando");
+        document.title = "🔴 NOVO PEDIDO";
+
+        tocarSomPedido();
+    }
+}
+
+setInterval(verificarNovoPedidoPainel, 3000);
+</script>
+
+</body>
+</html>

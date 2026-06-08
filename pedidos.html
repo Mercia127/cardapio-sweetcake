@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Pedidos do Dia - SweetCake</title>
+
+<style>
+body{
+    font-family:Arial;
+    background:#f8fafc;
+    padding:20px;
+}
+
+h1{
+    color:#e91e63;
+}
+
+.pedido{
+    background:white;
+    padding:15px;
+    margin-bottom:15px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+
+button{
+    background:#e91e63;
+    color:white;
+    border:none;
+    padding:8px 12px;
+    border-radius:6px;
+    cursor:pointer;
+    margin:3px;
+}
+
+.imprimir{
+    background:#16a34a;
+}
+
+.cancelar{
+    background:#dc2626;
+}
+
+.status{
+    font-weight:bold;
+    color:#2563eb;
+}
+</style>
+</head>
+<body>
+
+<h1>📋 Pedidos do Dia</h1>
+<input
+id="buscaTelefone"
+type="text"
+placeholder="Buscar por telefone..."
+onkeyup="filtrarTelefone()"
+style="width:300px;padding:10px;margin:10px 0;border-radius:8px;border:1px solid #ccc;">
+
+<button onclick="window.location.href='index.html'">Voltar para o Cardápio</button>
+
+<hr>
+
+<div id="listaPedidos"></div>
+
+<script>
+var pedidos = JSON.parse(localStorage.getItem("pedidosSweetCake")) || [];
+var quantidadePedidosAnterior = pedidos.length;
+
+function carregarPedidos(){
+    var lista = document.getElementById("listaPedidos");
+    lista.innerHTML = "";
+
+    if(pedidos.length === 0){
+        lista.innerHTML = "<p>Nenhum pedido hoje.</p>";
+        return;
+    }
+
+    for(var i = pedidos.length - 1; i >= 0; i--){
+        var pedido = pedidos[i];
+
+        lista.innerHTML +=
+            "<div class='pedido'>" +
+            "<h2>Pedido #" + pedido.numero + "</h2>" +
+"<p><b>Data:</b> " + (pedido.data || "") + "</p>" +
+"<p><b>Horário:</b> " + (pedido.horario || "") + "</p>" +
+            "<p><b>Cliente:</b> " + pedido.nome + "</p>" +
+            "<p><b>Telefone:</b> " + pedido.telefone + "</p>" +
+            "<p><b>Tipo:</b> " + pedido.tipoEntrega + "</p>" +
+            "<p><b>Endereço:</b> " + pedido.endereco + "</p>" +
+            "<p><b>Pagamento:</b> " + pedido.pagamento + "</p>" +
+            "<p><b>Subtotal:</b> R$ " + pedido.subtotal + "</p>" +
+            "<p><b>Entrega:</b> R$ " + pedido.entrega + "</p>" +
+            "<h3>Total: R$ " + pedido.total + "</h3>" +
+            "<p class='status'>Status: " + pedido.status + "</p>" +
+            "<button onclick='verPedido(" + i + ")'>Ver</button>" +
+"<button onclick='abrirWhatsApp(" + i + ")'>WhatsApp</button>" +
+            "<button class='imprimir' onclick='imprimirPedido(" + i + ")'>Imprimir</button>" +
+            "<button onclick='mudarStatus(" + i + ", \"Preparando\")'>Preparando</button>" +
+            "<button onclick='mudarStatus(" + i + ", \"Entregue\")'>Entregue</button>" +
+            "<button class='cancelar' onclick='mudarStatus(" + i + ", \"Cancelado\")'>Cancelar</button>" +
+            "</div>";
+    }
+}
+
+function verPedido(index){
+    var pedido = pedidos[index];
+
+    var texto = "Pedido #" + pedido.numero + "\n\n";
+texto += "Pedido #" + pedido.numero + "\n";
+texto += "Data: " + (pedido.data || "") + "\n";
+texto += "Horário: " + (pedido.horario || "") + "\n";
+    texto += "Cliente: " + pedido.nome + "\n";
+    texto += "Telefone: " + pedido.telefone + "\n";
+    texto += "Tipo: " + pedido.tipoEntrega + "\n";
+    texto += "Endereço: " + pedido.endereco + "\n";
+    texto += "Pagamento: " + pedido.pagamento + "\n\n";
+    texto += "Itens:\n";
+
+    for(var i = 0; i < pedido.itens.length; i++){
+        texto += pedido.itens[i].quantidade + "x " + pedido.itens[i].nome + " - R$ " + pedido.itens[i].subtotal + "\n";
+    }
+
+    texto += "\nSubtotal: R$ " + pedido.subtotal;
+    texto += "\nEntrega: R$ " + pedido.entrega;
+    texto += "\nTotal: R$ " + pedido.total;
+
+    if(pedido.observacao){
+        texto += "\n\nObs: " + pedido.observacao;
+    }
+
+    alert(texto);
+}
+
+function imprimirPedido(index){
+    var pedido = pedidos[index];
+
+    var conteudo = "";
+    conteudo += "<h2>SWEETCAKE</h2>";
+    conteudo += "<h3>Pedido #" + pedido.numero + "</h3>";
+conteudo += "<p><b>Data:</b> " + (pedido.data || "") + "</p>";
+conteudo += "<p><b>Horário:</b> " + (pedido.horario || "") + "</p>";
+    conteudo += "<hr>";
+    conteudo += "<p><b>Cliente:</b> " + pedido.nome + "</p>";
+    conteudo += "<p><b>Telefone:</b> " + pedido.telefone + "</p>";
+    conteudo += "<p><b>Tipo:</b> " + pedido.tipoEntrega + "</p>";
+    conteudo += "<p><b>Endereço:</b> " + pedido.endereco + "</p>";
+    conteudo += "<p><b>Pagamento:</b> " + pedido.pagamento + "</p>";
+    conteudo += "<hr>";
+    conteudo += "<h3>Itens</h3>";
+
+    for(var i = 0; i < pedido.itens.length; i++){
+        conteudo += "<p>" + pedido.itens[i].quantidade + "x " + pedido.itens[i].nome + " - R$ " + pedido.itens[i].subtotal + "</p>";
+    }
+
+    conteudo += "<hr>";
+    conteudo += "<p>Subtotal: R$ " + pedido.subtotal + "</p>";
+    conteudo += "<p>Entrega: R$ " + pedido.entrega + "</p>";
+    conteudo += "<h3>Total: R$ " + pedido.total + "</h3>";
+
+    if(pedido.observacao){
+        conteudo += "<p><b>Obs:</b> " + pedido.observacao + "</p>";
+    }
+
+    var janela = window.open("", "_blank");
+    janela.document.write("<html><head><title>Imprimir Pedido</title></head><body>");
+    janela.document.write(conteudo);
+    janela.document.write("</body></html>");
+    janela.document.close();
+    janela.print();
+}
+
+function mudarStatus(index, novoStatus){
+    pedidos[index].status = novoStatus;
+    localStorage.setItem("pedidosSweetCake", JSON.stringify(pedidos));
+    carregarPedidos();
+}
+function tocarSomPedido(){
+
+    var audio = new Audio();
+
+    audio.src =
+    "https://actions.google.com/sounds/v1/alarms/beep_short.ogg";
+
+    audio.volume = 1;
+
+    audio.play()
+    .then(() => console.log("Som tocou"))
+    .catch(err => console.log("Erro:", err));
+}
+function verificarNovoPedido(){
+    var pedidosAtualizados = JSON.parse(localStorage.getItem("pedidosSweetCake")) || [];
+
+    if(pedidosAtualizados.length > quantidadePedidosAnterior){
+        pedidos = pedidosAtualizados;
+        quantidadePedidosAnterior = pedidosAtualizados.length;
+        carregarPedidos();
+        tocarSomPedido();
+        alert("Novo pedido recebido!");
+    }
+}
+
+setInterval(verificarNovoPedido, 3000);
+carregarPedidos();
+function filtrarTelefone(){
+    var busca = document.getElementById("buscaTelefone").value.toLowerCase();
+
+    var pedidosTela = document.querySelectorAll(".pedido");
+
+    for(var i = 0; i < pedidosTela.length; i++){
+
+        var texto = pedidosTela[i].innerText.toLowerCase();
+
+        if(texto.includes(busca)){
+            pedidosTela[i].style.display = "block";
+        }else{
+            pedidosTela[i].style.display = "none";
+        }
+    }
+}
+function abrirWhatsApp(index){
+
+    var pedido = pedidos[index];
+
+    var telefone = String(pedido.telefone || "")
+        .replace(/\D/g,'');
+
+    if(!telefone){
+        alert("Telefone não informado");
+        return;
+    }
+
+    window.open(
+        "https://wa.me/55" + telefone,
+        "_blank"
+    );
+}
+</script>
+
+</body>
+</html>

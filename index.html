@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>SweetCakepremuim</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topo">
+    <h1>🍰 SweetCakepremuim</h1>
+    <p>Doces, Salgados e Kits Festa</p>
+</header>
+
+<section class="status">
+    <div class="aberto" id="statusLoja">🟢 Aberto</div>
+</section>
+<section class="banner-principal">
+    <h2>🎉 Promoções SweetCake</h2>
+    <p>Doces, salgados e kits festa fresquinhos para você!</p>
+    <strong>🔥 Peça pelo WhatsApp e retire na loja ou receba em casa.</strong>
+</section>
+
+<div class="conteudo">
+
+<section class="categorias">
+    <h2>🛍️ Cardápio</h2>
+
+    <input type="text" id="buscaProduto" placeholder="Buscar produto..." onkeyup="filtrarProdutos()">
+
+    <br><br>
+
+    <h2>⭐ Destaques</h2>
+    <div id="produtosDestaque"></div>
+
+    <br>
+
+    <h2>🔥 Promoção do Dia</h2>
+    <div id="promocaoDoDia"></div>
+
+    <br>
+
+    <div id="listaProdutosLoja"></div>
+</section>
+
+<section class="carrinho">
+    <h2>🛒 Carrinho</h2>
+
+    <div id="itensCarrinho"></div>
+
+    <p>Subtotal: R$ <span id="subtotalCarrinho">0,00</span></p>
+    <p>Entrega: R$ <span id="valorEntrega">0,00</span></p>
+    <h3>Total: R$ <span id="totalCarrinho">0,00</span></h3>
+
+    <input type="text" id="clienteNome" placeholder="Nome do cliente">
+    <input type="text" id="clienteTelefone" placeholder="Telefone">
+
+    <select id="tipoEntrega" onchange="calcularTaxaEntrega()">
+        <option value="Retirada na loja">Retirada na loja</option>
+        <option value="Entrega">Entrega</option>
+    </select>
+
+    <select id="taxaEntrega" onchange="atualizarCarrinho()">
+        <option value="0">Retirada grátis</option>
+        <option value="10">Satélite Íris 1 - R$ 10,00</option>
+        <option value="10">Até 3 km - R$ 10,00</option>
+        <option value="15">3 a 5 km - R$ 15,00</option>
+        <option value="20">5 a 7 km - R$ 20,00</option>
+        <option value="consultar">Acima de 7 km - Consultar</option>
+    </select>
+<p id="textoTaxaEntrega" style="font-size:14px;color:#334155;margin:5px 0;">
+    Taxa selecionada: R$ 0,00
+</p>
+    <input type="text" id="clienteEndereco" placeholder="Endereço para entrega">
+
+    <select id="pagamento">
+        <option value="Pix">Pix</option>
+        <option value="Cartão">Cartão</option>
+        <option value="Dinheiro">Dinheiro</option>
+    </select>
+
+    <textarea id="observacao" placeholder="Observações"></textarea>
+
+    <button class="pedido" onclick="finalizarPedido()">Finalizar Pedido</button>
+<input type="text" id="cupom" placeholder="Cupom SWEET5">
+
+<button type="button" onclick="aplicarCupom()">Aplicar Cupom</button>
+
+<p id="msgCupom"></p>
+</section>
+
+</div>
+
+<script>
+var carrinho = [];
+var desconto = 0;
+var subtotalCarrinho = 0;
+var produtos = JSON.parse(localStorage.getItem("produtosSweetCake")) || [];
+console.log(produtos);
+var lista = document.getElementById("listaProdutosLoja");
+var destaque = document.getElementById("produtosDestaque");
+var promocaoDoDia = document.getElementById("promocaoDoDia");
+function produtoDisponivel(produto){
+    if(produto.ativo === false){
+        return false;
+    }
+
+    if(produto.estoque !== undefined && Number(produto.estoque) <= 0){
+        return false;
+    }
+
+    return true;
+}
+if(lista){
+lista.innerHTML = "";
+}
+destaque.innerHTML = "";
+promocaoDoDia.innerHTML = "";
+
+for(var d = 0; d < produtos.length; d++){
+    if(produtos[d].destaque !== true){
+        continue;
+    }
+
+   if(!produtoDisponivel(produtos[d])){
+    continue;
+}
+if(produtos[d].estoque !== undefined && Number(produtos[d].estoque) <= 0){
+    continue;
+}
+    destaque.innerHTML += montarCardProduto(produtos[d], "⭐");
+}
+
+for(var p = 0; p < produtos.length; p++){
+    if(produtos[p].promocaoDia !== true){
+        continue;
+    }
+
+   if(!produtoDisponivel(produtos[p])){
+    continue;
+}
+
+    promocaoDoDia.innerHTML += montarCardProduto(produtos[p], "🔥");
+}
+
+var categorias = [
+    "Doces e Sobremesas",
+    "Salgados",
+    "Kits Festa",
+    "Bebidas"
+];
+
+for(var c = 0; c < categorias.length; c++){
+    var categoriaAtual = categorias[c];
+
+  if(lista){
+    lista.innerHTML += "<h2>" + categoriaAtual + "</h2>";
+}
+    for(var i = 0; i < produtos.length; i++){
+        var produto = produtos[i];
+
+      if(!produtoDisponivel(produto)){
+    continue;
+}
+        if(produto.categoria !== categoriaAtual){
+            continue;
+        }
+
+        if(lista){
+    lista.innerHTML += montarCardProduto(produto, "");
+        }
+    }
+}
+function montarCardProduto(produto, icone){
+    var descricao = produto.descricao || "";
+    var foto = produto.foto || "";
+
+    var html = "";
+    html += "<div class='produto produto-lista'>";
+
+    html += "<div class='produto-info'>";
+    html += "<h3>" + icone + " " + produto.nome + "</h3>";
+
+    if(descricao !== ""){
+        html += "<p class='descricao-produto'>" + descricao + "</p>";
+    }
+
+    html += "<p class='preco-produto'>R$ " + Number(produto.preco).toFixed(2).replace('.', ',') + "</p>";
+    html += "<button onclick='adicionarProduto(\"" + produto.nome + "\", " + produto.preco + ")'>Adicionar</button>";
+    html += "</div>";
+
+    if(foto !== ""){
+        html += "<img class='foto-produto-lista' src='" + foto + "'>";
+    }
+
+    html += "</div>";
+
+    return html;
+}
+
+function adicionarProduto(nome, preco){
+    preco = Number(preco);
+
+    var itemExistente = carrinho.find(function(item){
+        return item.nome === nome;
+    });
+
+    if(itemExistente){
+        itemExistente.quantidade++;
+    }else{
+        carrinho.push({
+            nome: nome,
+            preco: preco,
+            quantidade: 1
+        });
+    }
+
+    atualizarCarrinho();
+}
+
+function atualizarCarrinho(){
+    var total = 0;
+    subtotalCarrinho = 0;
+    var itens = document.getElementById("itensCarrinho");
+    itens.innerHTML = "";
+
+    for(var i = 0; i < carrinho.length; i++){
+        var item = carrinho[i];
+        var subtotalItem = item.preco * item.quantidade;
+       subtotalCarrinho +=subtotalItem;
+
+        itens.innerHTML +=
+            "<div>" +
+            "<b>" + item.quantidade + "x " + item.nome + "</b> — R$ " + subtotalItem.toFixed(2).replace(".", ",") +
+            "<br>" +
+            "<button onclick='diminuirItem(" + i + ")'>-</button> " +
+            "<button onclick='aumentarItem(" + i + ")'>+</button> " +
+            "<button onclick='removerItem(" + i + ")'>Remover</button>" +
+            "</div><br>";
+    }
+
+    var taxa = document.getElementById("taxaEntrega");
+    var valorTaxa = 0;
+
+    if(taxa && taxa.value !== "consultar"){
+        valorTaxa = Number(taxa.value);
+    }
+var total = subtotalCarrinho + valorTaxa - desconto;
+if(total < 0){
+    total = 0;
+}
+    document.getElementById("subtotalCarrinho").innerText =
+        subtotalCarrinho.toFixed(2).replace(".", ",");
+
+    document.getElementById("valorEntrega").innerText =
+        valorTaxa.toFixed(2).replace(".", ",");
+var textoTaxaEntrega = document.getElementById("textoTaxaEntrega");
+
+if(textoTaxaEntrega){
+    if(taxa.value === "consultar"){
+        textoTaxaEntrega.innerText = "Taxa selecionada: Consultar";
+    }else{
+        textoTaxaEntrega.innerText = "Taxa selecionada: R$ " + valorTaxa.toFixed(2).replace(".", ",");
+    }
+}
+
+    document.getElementById("totalCarrinho").innerText =
+        total.toFixed(2).replace(".", ",");
+}
+
+function aumentarItem(index){
+    carrinho[index].quantidade++;
+    atualizarCarrinho();
+}
+
+function diminuirItem(index){
+    carrinho[index].quantidade--;
+
+    if(carrinho[index].quantidade <= 0){
+        carrinho.splice(index, 1);
+    }
+
+    atualizarCarrinho();
+}
+
+function removerItem(index){
+    carrinho.splice(index, 1);
+    atualizarCarrinho();
+}
+
+function calcularTaxaEntrega(){
+    var tipoEntrega = document.getElementById("tipoEntrega").value;
+    var pagamento = document.getElementById("pagamento");
+    var taxaEntrega = document.getElementById("taxaEntrega");
+
+    if(tipoEntrega === "Entrega"){
+        pagamento.innerHTML =
+            "<option value='Pix'>Pix</option>" +
+            "<option value='Cartão'>Cartão</option>";
+
+        taxaEntrega.value = "10";
+    }else{
+        pagamento.innerHTML =
+            "<option value='Pix'>Pix</option>" +
+            "<option value='Cartão'>Cartão</option>" +
+            "<option value='Dinheiro'>Dinheiro</option>";
+
+        taxaEntrega.value = "0";
+    }
+
+    atualizarCarrinho();
+}
+
+function finalizarPedido(){
+    if(carrinho.length === 0){
+        alert("Adicione pelo menos um produto ao carrinho.");
+        return;
+    }
+
+    var nome = document.getElementById("clienteNome").value;
+    var telefone = document.getElementById("clienteTelefone").value;
+    var tipoEntrega = document.getElementById("tipoEntrega").value;
+    var endereco = document.getElementById("clienteEndereco").value;
+    var pagamento = document.getElementById("pagamento").value;
+    var taxa = document.getElementById("taxaEntrega").value;
+    var textoTaxa = document.getElementById("taxaEntrega").options[document.getElementById("taxaEntrega").selectedIndex].text;
+    var observacao = document.getElementById("observacao").value;
+
+    if(nome === ""){
+        alert("Informe o nome do cliente.");
+        return;
+    }
+
+    if(tipoEntrega === "Entrega" && endereco === ""){
+        alert("Informe o endereço para entrega.");
+        return;
+    }
+
+    var subtotalPedido = 0;
+    var totalPedido = 0;
+    var texto = "Olá, gostaria de fazer um pedido:%0A%0A";
+
+    texto += "Cliente: " + nome + "%0A";
+    texto += "Telefone: " + telefone + "%0A";
+    texto += "Tipo: " + tipoEntrega + "%0A";
+
+    if(tipoEntrega === "Entrega"){
+        texto += "Endereço: " + endereco + "%0A";
+    }
+
+    texto += "Pagamento: " + pagamento + "%0A";
+
+    if(observacao !== ""){
+        texto += "Observação: " + observacao + "%0A";
+    }
+
+    texto += "%0AItens:%0A";
+
+    for(var i = 0; i < carrinho.length; i++){
+        var item = carrinho[i];
+        var subtotalItem = item.preco * item.quantidade;
+        subtotalPedido += subtotalItem;
+
+        texto += item.quantidade + "x " + item.nome + " - R$ " + subtotalItem.toFixed(2).replace(".", ",") + "%0A";
+    }
+
+    totalPedido = subtotalPedido;
+
+    texto += "%0ASubtotal: R$ " + subtotalPedido.toFixed(2).replace(".", ",");
+
+    if(taxa === "consultar"){
+        texto += "%0ATaxa de entrega: Consultar";
+    }else{
+        totalPedido += Number(taxa);
+        texto += "%0ATaxa de entrega: " + textoTaxa;
+    }
+
+    texto += "%0ATotal: R$ " + totalPedido.toFixed(2).replace(".", ",");
+
+    var pedidos = JSON.parse(localStorage.getItem("pedidosSweetCake")) || [];
+
+    var novoPedido = {
+        numero: pedidos.length + 1,
+horario: new Date().toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit"
+}),
+data: new Date().toLocaleDateString("pt-BR"),
+        nome: nome,
+        telefone: telefone,
+        tipoEntrega: tipoEntrega,
+        endereco: endereco,
+        pagamento: pagamento,
+        observacao: observacao,
+        subtotal: subtotalPedido.toFixed(2).replace(".", ","),
+        entrega: taxa === "consultar" ? "Consultar" : Number(taxa).toFixed(2).replace(".", ","),
+        total: totalPedido.toFixed(2).replace(".", ","),
+        status: "Recebido",
+        itens: []
+    };
+
+    for(var i = 0; i < carrinho.length; i++){
+        novoPedido.itens.push({
+            nome: carrinho[i].nome,
+            quantidade: carrinho[i].quantidade,
+            subtotal: (carrinho[i].preco * carrinho[i].quantidade).toFixed(2).replace(".", ",")
+        });
+    }
+
+    pedidos.push(novoPedido);
+
+    localStorage.setItem("pedidosSweetCake", JSON.stringify(pedidos));
+alert("pedido savo no painel!")
+for(var i = 0; i < carrinho.length; i++){
+    for(var j = 0; j < produtos.length; j++){
+        if(produtos[j].nome === carrinho[i].nome){
+            produtos[j].estoque = Number(produtos[j].estoque || 0) - carrinho[i].quantidade;
+
+            if(produtos[j].estoque < 0){
+                produtos[j].estoque = 0;
+            }
+        }
+    }
+}
+
+localStorage.setItem("produtosSweetCake", JSON.stringify(produtos));
+    window.open("https://wa.me/5519984152639?text=" + texto, "_blank");
+}
+function filtrarProdutos(){
+    var busca = document.getElementById("buscaProduto").value.toLowerCase();
+    var produtosTela = document.querySelectorAll(".produto");
+
+    for(var i = 0; i < produtosTela.length; i++){
+        var texto = produtosTela[i].innerText.toLowerCase();
+
+        if(texto.includes(busca)){
+            produtosTela[i].style.display = "block";
+        }else{
+            produtosTela[i].style.display = "none";
+        }
+    }
+}
+
+function verificarHorarioLoja(){
+    var controle = localStorage.getItem("statusLojaSweetCake") || "automatico";
+    var status = document.getElementById("statusLoja");
+
+    if(controle === "aberto"){
+        status.innerHTML = "🟢 Aberto";
+        status.style.background = "#22c55e";
+        return;
+    }
+
+    if(controle === "fechado"){
+        status.innerHTML = "🔴 Fechado";
+        status.style.background = "#ef4444";
+        return;
+    }
+
+    var agora = new Date();
+    var dia = agora.getDay();
+    var hora = agora.getHours();
+    var minuto = agora.getMinutes();
+    var atual = hora * 60 + minuto;
+
+    var aberto = false;
+
+    if(dia === 0){
+        aberto = atual >= (7 * 60) && atual < (12 * 60 + 30);
+    }
+
+    if(dia === 1){
+        aberto = false;
+    }
+
+    if(dia >= 2 && dia <= 6){
+        aberto = atual >= (7 * 60 + 30) && atual < (18 * 60 + 30);
+    }
+
+    if(aberto){
+        status.innerHTML = "🟢 Aberto";
+        status.style.background = "#22c55e";
+    }else{
+        status.innerHTML = "🔴 Fechado";
+        status.style.background = "#ef4444";
+    }
+}
+function aplicarCupom(){
+    const codigo = document.getElementById("cupom").value.trim().toUpperCase();
+
+    if(codigo === "SWEET5" && subtotalCarrinho >= 50){
+        desconto = 5;
+        document.getElementById("msgCupom").innerHTML =
+        "✅ Cupom aplicado: R$ 5,00 de desconto";
+    }else if(codigo === "SWEET5"){
+        document.getElementById("msgCupom").innerHTML =
+        "⚠️ Pedido mínimo de R$ 50,00 para usar este cupom";
+    }else{
+        desconto = 0;
+        document.getElementById("msgCupom").innerHTML =
+        "❌ Cupom inválido";
+    }
+
+    atualizarCarrinho();
+}
+calcularTaxaEntrega();
+verificarHorarioLoja();
+</script>
+
+</body>
+</html>

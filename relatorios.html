@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Relatórios - SweetCake</title>
+
+<style>
+body{
+    font-family:Arial;
+    background:#f8fafc;
+    padding:20px;
+    max-width:1000px;
+    margin:auto;
+}
+
+h1{
+    color:#e91e63;
+}
+
+.card{
+    background:white;
+    padding:15px;
+    margin:10px 0;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+
+button{
+    background:#e91e63;
+    color:white;
+    border:none;
+    padding:8px 12px;
+    border-radius:6px;
+    cursor:pointer;
+    margin:5px;
+    font-size:14px;
+}
+
+.imprimir{
+    background:#16a34a;
+}
+
+.limpar{
+    background:#dc2626;
+}
+</style>
+</head>
+
+<body>
+
+<h1>📊 Relatórios SweetCake</h1>
+<button class="imprimir" onclick="imprimirRelatorio()">🖨️ Imprimir Relatório</button>
+<button class="limpar" onclick="limparPedidos()">🗑️ Limpar Pedidos do Dia</button>
+
+<hr>
+
+<div id="resumoRelatorio"></div>
+
+<script>
+var pedidos = JSON.parse(localStorage.getItem("pedidosSweetCake")) || [];
+
+function moeda(valor){
+    return valor.toFixed(2).replace(".", ",");
+}
+
+function carregarRelatorio(){
+    var resumo = document.getElementById("resumoRelatorio");
+
+    var totalPedidos = pedidos.length;
+    var totalRecebido = 0;
+    var totalCancelado = 0;
+
+    var pix = 0;
+    var cartao = 0;
+    var dinheiro = 0;
+
+    var recebidos = 0;
+    var produtosVendidos = {};
+    var preparando = 0;
+    var entregue = 0;
+    var cancelado = 0;
+
+    for(var i = 0; i < pedidos.length; i++){
+        var pedido = pedidos[i];
+if(pedido.itens){
+    for(var j = 0; j < pedido.itens.length; j++){
+        var item = pedido.itens[j];
+
+        if(!produtosVendidos[item.nome]){
+            produtosVendidos[item.nome] = 0;
+        }
+
+        produtosVendidos[item.nome] += Number(item.quantidade);
+    }
+}
+
+        var total = Number(String(pedido.total).replace(",", "."));
+
+        if(pedido.status === "Cancelado"){
+            totalCancelado += total;
+            cancelado++;
+            continue;
+        }
+
+        totalRecebido += total;
+
+        if(pedido.pagamento === "Pix"){
+            pix += total;
+        }
+
+        if(pedido.pagamento === "Cartão"){
+            cartao += total;
+        }
+        if(pedido.itens){
+         for(var j = 0; j < pedido.itens.length; j++){
+        var item = pedido.itens[j];
+
+        if(!produtosVendidos[item.nome]){
+            produtosVendidos[item.nome] = 0;
+        }
+
+        produtosVendidos[item.nome] += Number(item.quantidade);
+    }
+}
+        if(pedido.pagamento === "Dinheiro"){
+            dinheiro += total;
+        }
+
+        if(pedido.status === "Recebido"){
+            recebidos++;
+        }
+
+        if(pedido.status === "Preparando"){
+            preparando++;
+        }
+
+        if(pedido.status === "Entregue"){
+            entregue++;
+        }
+    }
+
+    resumo.innerHTML =
+        "<div class='card'>" +
+        "<h2>Resumo do Dia</h2>" +
+        "<p><b>Total de pedidos:</b> " + totalPedidos + "</p>" +
+        "<p><b>Total recebido:</b> R$ " + moeda(totalRecebido) + "</p>" +
+        "<p><b>Total cancelado:</b> R$ " + moeda(totalCancelado) + "</p>" +
+        "</div>" +
+
+        "<div class='card'>" +
+        "<h2>Por Forma de Pagamento</h2>" +
+        "<p><b>Pix:</b> R$ " + moeda(pix) + "</p>" +
+        "<p><b>Cartão:</b> R$ " + moeda(cartao) + "</p>" +
+        "<p><b>Dinheiro:</b> R$ " + moeda(dinheiro) + "</p>" +
+        "</div>" +
+
+        "<div class='card'>" +
+        "<h2>Status dos Pedidos</h2>"+
+        "<p><b>Recebidos:</b> " + recebidos + "</p>" +
+        "<p><b>Preparando:</b> " + preparando + "</p>" +
+        "<p><b>Entregues:</b> " + entregue + "</p>" +
+        "<p><b>Cancelados:</b> " + cancelado + "</p>" +
+        "</div>";
+var htmlProdutos = "<div class='card'><h2>Produtos Mais Vendidos</h2>";
+
+for(var nomeProduto in produtosVendidos){
+    htmlProdutos += "<p><b>" + nomeProduto + ":</b> " + produtosVendidos[nomeProduto] + " unidade(s)</p>";
+}
+
+htmlProdutos += "</div>";
+
+resumo.innerHTML += htmlProdutos;
+}
+
+function imprimirRelatorio(){
+
+    document.querySelector(".imprimir").style.display = "none";
+    document.querySelector(".limpar").style.display = "none";
+
+    window.print();
+
+    document.querySelector(".imprimir").style.display = "inline-block";
+    document.querySelector(".limpar").style.display = "inline-block";
+}
+
+function limparPedidos(){
+    if(confirm("Tem certeza que deseja limpar todos os pedidos do dia?")){
+        localStorage.removeItem("pedidosSweetCake");
+        alert("Pedidos limpos com sucesso!");
+        location.reload();
+    }
+}
+
+carregarRelatorio();
+</script>
+
+</body>
+</html>
