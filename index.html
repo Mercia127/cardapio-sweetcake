@@ -442,10 +442,13 @@ data: new Date().toLocaleDateString("pt-BR"),
         });
     }
 
-    pedidos.push(novoPedido);
+   pedidos.push(novoPedido);
 
-    localStorage.setItem("pedidosSweetCake", JSON.stringify(pedidos));
-alert("pedido salvo no painel!");
+localStorage.setItem("pedidosSweetCake", JSON.stringify(pedidos));
+
+db.collection("pedidos").add(novoPedido).then(function(){
+    alert("Pedido enviado com sucesso!");
+});
 for(var i = 0; i < carrinho.length; i++){
     for(var j = 0; j < produtos.length; j++){
         if(produtos[j].nome === carrinho[i].nome){
