@@ -118,8 +118,10 @@ db.collection("sistema").doc("produtos").get().then(function(doc){
         var produtosFirebase = doc.data().lista || [];
         var novo = JSON.stringify(produtosFirebase);
         var atual = localStorage.getItem("produtosSweetCake") || "[]";
-if(novo !== atual){
+if(novo !== atual && sessionStorage.getItem("produtosAtualizados") !== "sim"){
     localStorage.setItem("produtosSweetCake", novo);
+    sessionStorage.setItem("produtosAtualizados", "sim");
+    location.reload();
 }
     }
 });
@@ -176,6 +178,7 @@ var categorias = [
     "Salgados",
     "Kits Festa",
     "Bebidas"
+    "Mercearia"
 ];
 
 for(var c = 0; c < categorias.length; c++){
