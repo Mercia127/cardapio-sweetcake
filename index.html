@@ -91,11 +91,39 @@
 
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAR_Cs8eI54zyfFfDKU4tneY6sYs5KOwWU",
+  authDomain: "sweetcake-cardapio.firebaseapp.com",
+  projectId: "sweetcake-cardapio",
+  storageBucket: "sweetcake-cardapio.firebasestorage.app",
+  messagingSenderId: "69352116515",
+  appId: "1:69352116515:web:c02c6d3a5df9e6d9c4bc96"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+</script>
+
 <script>
 var carrinho = [];
 var desconto = 0;
 var subtotalCarrinho = 0;
 var produtos = JSON.parse(localStorage.getItem("produtosSweetCake")) || [];
+db.collection("sistema").doc("produtos").get().then(function(doc){
+    if(doc.exists){
+        var produtosFirebase = doc.data().lista || [];
+        var novo = JSON.stringify(produtosFirebase);
+        var atual = localStorage.getItem("produtosSweetCake") || "[]";
+if(novo !== atual){
+    localStorage.setItem("produtosSweetCake", novo);
+}
+    }
+});
+sessionStorage.removeItem("produtosAtualizados");
 console.log(produtos);
 var lista = document.getElementById("listaProdutosLoja");
 var destaque = document.getElementById("produtosDestaque");
