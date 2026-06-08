@@ -99,6 +99,7 @@ function carregarPedidos(){
 "<p><b>Data:</b> " + (pedido.data || "") + "</p>" +
 "<p><b>Horário:</b> " + (pedido.horario || "") + "</p>" +
             "<p><b>Cliente:</b> " + pedido.nome + "</p>" +
+conteudo += "<p><b>Pedido do cliente:</b> #" + (pedido.pedidosCliente || 1) + "</p>"; 
             "<p><b>Telefone:</b> " + pedido.telefone + "</p>" +
             "<p><b>Tipo:</b> " + pedido.tipoEntrega + "</p>" +
             "<p><b>Endereço:</b> " + pedido.endereco + "</p>" +
@@ -156,6 +157,7 @@ conteudo += "<p><b>Data:</b> " + (pedido.data || "") + "</p>";
 conteudo += "<p><b>Horário:</b> " + (pedido.horario || "") + "</p>";
     conteudo += "<hr>";
     conteudo += "<p><b>Cliente:</b> " + pedido.nome + "</p>";
+conteudo += "<p><b>Pedido do cliente:</b> #" + (pedido.pedidosCliente || 1) + "</p>";
     conteudo += "<p><b>Telefone:</b> " + pedido.telefone + "</p>";
     conteudo += "<p><b>Tipo:</b> " + pedido.tipoEntrega + "</p>";
     conteudo += "<p><b>Endereço:</b> " + pedido.endereco + "</p>";

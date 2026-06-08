@@ -415,11 +415,14 @@ var statusLoja = document.getElementById("statusLoja").innerText;
     var pedidos = JSON.parse(localStorage.getItem("pedidosSweetCake")) || [];
 
     var novoPedido = {
-        numero: pedidos.length + 1,
-horario: new Date().toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit"
-}),
+    numero: pedidos.length + 1,
+    pedidosCliente: pedidos.filter(function(p){
+        return p.telefone === telefone;
+    }).length + 1,
+    horario: new Date().toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit"
+    }),
 data: new Date().toLocaleDateString("pt-BR"),
         nome: nome,
         telefone: telefone,
