@@ -26,8 +26,7 @@
 <section class="categorias">
     <h2>🛍️ Cardápio</h2>
 
-    <input type="text" id="buscaProduto" placeholder="Buscar produto..." onkeyup="filtrarProdutos()">
-
+    <input type="text" id="buscaProduto" placeholder="Buscar produto..." oninput="filtrarProdutos()">
     <br><br>
 <div class="atalhos-categorias">
     <button onclick="irParaCategoria('Combos')">🎁 Combos</button>
@@ -342,6 +341,12 @@ function calcularTaxaEntrega(){
 }
 
 function finalizarPedido(){
+var statusLoja = document.getElementById("statusLoja").innerText;
+
+    if(statusLoja.includes("Fechado")){
+        alert("A loja está fechada no momento. Não estamos recebendo pedidos agora.");
+        return;
+    }
     if(carrinho.length === 0){
         alert("Adicione pelo menos um produto ao carrinho.");
         return;
@@ -440,7 +445,7 @@ data: new Date().toLocaleDateString("pt-BR"),
     pedidos.push(novoPedido);
 
     localStorage.setItem("pedidosSweetCake", JSON.stringify(pedidos));
-alert("pedido savo no painel!")
+alert("pedido salvo no painel!");
 for(var i = 0; i < carrinho.length; i++){
     for(var j = 0; j < produtos.length; j++){
         if(produtos[j].nome === carrinho[i].nome){
@@ -458,7 +463,8 @@ localStorage.setItem("produtosSweetCake", JSON.stringify(produtos));
 }
 function irParaCategoria(categoria){
     var id = categoria.replaceAll(" ", "-");
-    var elemento = document.getElementById(id);
+    var elemento =
+ document.getElementById(id);
 
     if(elemento){
         elemento.scrollIntoView({
@@ -469,7 +475,20 @@ function irParaCategoria(categoria){
         alert("Categoria ainda não encontrada: " + categoria);
     }
 }
+function filtrarProdutos(){
+    var busca = document.getElementById("buscaProduto").value.toLowerCase().trim();
+    var produtosTela = document.querySelectorAll(".produto-lista");
 
+    for(var i = 0; i < produtosTela.length; i++){
+        var textoProduto = produtosTela[i].innerText.toLowerCase();
+
+        if(busca === "" || textoProduto.indexOf(busca) >= 0){
+            produtosTela[i].style.display = "";
+        }else{
+            produtosTela[i].style.display = "none";
+        }
+    }
+}
 function verificarHorarioLoja(){
     var controle = localStorage.getItem("statusLojaSweetCake") || "automatico";
     var status = document.getElementById("statusLoja");
