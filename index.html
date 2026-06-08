@@ -490,7 +490,12 @@ function filtrarProdutos(){
     }
 }
 function verificarHorarioLoja(){
-    var controle = localStorage.getItem("statusLojaSweetCake") || "automatico";
+   var controle = "automatico";
+
+db.collection("sistema").doc("statusLoja").get().then(function(doc){
+    if(doc.exists){
+        controle = doc.data().status || "automatico";
+    }
     var status = document.getElementById("statusLoja");
 
     if(controle === "aberto"){
@@ -532,6 +537,7 @@ function verificarHorarioLoja(){
         status.innerHTML = "🔴 Fechado";
         status.style.background = "#ef4444";
     }
+});
 }
 function aplicarCupom(){
     const codigo = document.getElementById("cupom").value.trim().toUpperCase();

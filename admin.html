@@ -82,6 +82,7 @@ button{
     <option>Kits Festa</option>
     <option>Bebidas</option>
     <option>Mercearia</option>
+    <option>Combos</option>
 </select>
 
 <button onclick="salvarProduto()" id="botaoSalvar">Salvar Produto</button>
@@ -263,8 +264,14 @@ function limparCampos(){
 
 function salvarStatusLoja(){
     var status = document.getElementById("controleStatusLoja").value;
+
     localStorage.setItem("statusLojaSweetCake", status);
-    alert("Status da loja salvo!");
+
+    db.collection("sistema").doc("statusLoja").set({
+        status: status
+    }).then(function(){
+        alert("Status da loja salvo!");
+    });
 }
 
 document.getElementById("controleStatusLoja").value =
