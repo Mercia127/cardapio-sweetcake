@@ -248,10 +248,20 @@ db.collection("pedidos").onSnapshot(function(snapshot){
         novosPedidos.push(pedido);
     });
 
-    if(novosPedidos.length > quantidadePedidosAnterior && quantidadePedidosAnterior > 0){
+    novosPedidos.sort(function(a, b){
+        return Number(a.numero || 0) - Number(b.numero || 0);
+    });
+
+    var tinhaPedidosAntes = quantidadePedidosAnterior;
+
+    pedidos = novosPedidos;
+    quantidadePedidosAnterior = novosPedidos.length;
+    carregarPedidos();
+
+    if(pedidos.length > tinhaPedidosAntes && tinhaPedidosAntes > 0){
         tocarSomPedido();
-        alert("Novo pedido recebido!");
     }
+});
 
     pedidos = novosPedidos;
     quantidadePedidosAnterior = novosPedidos.length;
