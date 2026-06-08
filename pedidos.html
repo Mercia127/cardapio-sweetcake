@@ -62,11 +62,25 @@ style="width:300px;padding:10px;margin:10px 0;border-radius:8px;border:1px solid
 <hr>
 
 <div id="listaPedidos"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <script>
-var pedidos = JSON.parse(localStorage.getItem("pedidosSweetCake")) || [];
-var quantidadePedidosAnterior = pedidos.length;
+const firebaseConfig = {
+  apiKey: "AIzaSyAR_Cs8eI54zyfFfDKU4tneY6sYs5KOwWU",
+  authDomain: "sweetcake-cardapio.firebaseapp.com",
+  projectId: "sweetcake-cardapio",
+  storageBucket: "sweetcake-cardapio.firebasestorage.app",
+  messagingSenderId: "69352116515",
+  appId: "1:69352116515:web:c02c6d3a5df9e6d9c4bc96"
+};
 
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+</script>
+<script>
+var pedidos = [];
+var quantidadePedidosAnterior = 0;
 function carregarPedidos(){
     var lista = document.getElementById("listaPedidos");
     lista.innerHTML = "";
@@ -188,20 +202,24 @@ function tocarSomPedido(){
     .then(() => console.log("Som tocou"))
     .catch(err => console.log("Erro:", err));
 }
-function verificarNovoPedido(){
-    var pedidosAtualizados = JSON.parse(localStorage.getItem("pedidosSweetCake")) || [];
+db.collection("pedidos").onSnapshot(function(snapshot){
+    var novosPedidos = [];
 
-    if(pedidosAtualizados.length > quantidadePedidosAnterior){
-        pedidos = pedidosAtualizados;
-        quantidadePedidosAnterior = pedidosAtualizados.length;
-        carregarPedidos();
+    snapshot.forEach(function(doc){
+        var pedido = doc.data();
+        pedido.idFirebase = doc.id;
+        novosPedidos.push(pedido);
+    });
+
+    if(novosPedidos.length > quantidadePedidosAnterior && quantidadePedidosAnterior > 0){
         tocarSomPedido();
         alert("Novo pedido recebido!");
     }
-}
 
-setInterval(verificarNovoPedido, 3000);
-carregarPedidos();
+    pedidos = novosPedidos;
+    quantidadePedidosAnterior = novosPedidos.length;
+    carregarPedidos();
+});
 function filtrarTelefone(){
     var busca = document.getElementById("buscaTelefone").value.toLowerCase();
 
