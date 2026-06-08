@@ -190,36 +190,13 @@ function mudarStatus(index, novoStatus){
     carregarPedidos();
 }
 function tocarSomPedido(){
-
-    var audio = new Audio();
-
-    audio.src =
-    "https://actions.google.com/sounds/v1/alarms/beep_short.ogg";
-
+    var audio = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
     audio.volume = 1;
 
-    audio.play()
-    .then(() => console.log("Som tocou"))
-    .catch(err => console.log("Erro:", err));
-}
-db.collection("pedidos").onSnapshot(function(snapshot){
-    var novosPedidos = [];
-
-    snapshot.forEach(function(doc){
-        var pedido = doc.data();
-        pedido.idFirebase = doc.id;
-        novosPedidos.push(pedido);
+    audio.play().catch(function(){
+        alert("🔔 Novo pedido recebido!");
     });
-
-    if(novosPedidos.length > quantidadePedidosAnterior && quantidadePedidosAnterior > 0){
-        tocarSomPedido();
-        alert("Novo pedido recebido!");
-    }
-
-    pedidos = novosPedidos;
-    quantidadePedidosAnterior = novosPedidos.length;
-    carregarPedidos();
-});
+}
 function filtrarTelefone(){
     var busca = document.getElementById("buscaTelefone").value.toLowerCase();
 
