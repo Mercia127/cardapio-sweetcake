@@ -240,29 +240,24 @@ function abrirWhatsApp(index){
 }
 
 db.collection("pedidos").onSnapshot(function(snapshot){
-    var novosPedidos = [];
+    pedidos = [];
 
     snapshot.forEach(function(doc){
         var pedido = doc.data();
         pedido.idFirebase = doc.id;
-        novosPedidos.push(pedido);
+        pedidos.push(pedido);
     });
 
-    novosPedidos.sort(function(a, b){
+    pedidos.sort(function(a, b){
         return Number(a.numero || 0) - Number(b.numero || 0);
     });
 
-    var tinhaPedidosAntes = quantidadePedidosAnterior;
-
-    pedidos = novosPedidos;
-    quantidadePedidosAnterior = novosPedidos.length;
     carregarPedidos();
 
-    if(pedidos.length > tinhaPedidosAntes && tinhaPedidosAntes > 0){
-        tocarSomPedido();
-    }
-});
+    tocarSomPedido();
 
+    console.log("Pedidos atualizados:", pedidos.length);
+});
 </script>
 
 </body>
