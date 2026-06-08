@@ -239,22 +239,32 @@ function abrirWhatsApp(index){
     window.open("https://wa.me/55" + telefone, "_blank");
 }
 
+var primeiraCargaPedidos = true;
+
 db.collection("pedidos").onSnapshot(function(snapshot){
-    pedidos = [];
+    var novosPedidos = [];
 
     snapshot.forEach(function(doc){
         var pedido = doc.data();
         pedido.idFirebase = doc.id;
-        pedidos.push(pedido);
+        novosPedidos.push(pedido);
     });
 
-    pedidos.sort(function(a, b){
+    novosPedidos.sort(function(a, b){
         return Number(a.numero || 0) - Number(b.numero || 0);
     });
 
+    var quantidadeAntes = pedidos.length;
+
+    pedidos = novosPedidos;
     carregarPedidos();
 
-    tocarSomPedido();
+    if(!primeiraCargaPedidos && pedidos.length > quantidadeAntes){
+        tocarSomPedido();
+        alert("Novo pedido recebido!");
+    }
+
+    primeiraCargaPedidos = false;
 
     console.log("Pedidos atualizados:", pedidos.length);
 });
