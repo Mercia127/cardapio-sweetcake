@@ -142,27 +142,18 @@ function salvarProduto(){
 
     if(fotoInput.files.length > 0){
         redimensionarFoto(fotoInput.files[0], function(fotoReduzida){
-    salvarProdutoFinal(
-        nome,
-        descricao,
-        preco,
-        estoque,
-        categoria,
-        destaque,
-        promocao,
-        promocaoDia,
-        ativo,
-        fotoReduzida,
-        editandoIndex
-     );
-  });
-}else{
+            salvarProdutoFinal(nome, descricao, preco, estoque, categoria, destaque, promocao, promocaoDia, ativo, fotoReduzida, editandoIndex);
+        });
+    }else{
         let fotoAntiga = "";
 
         if(editandoIndex !== ""){
             fotoAntiga = produtos[editandoIndex].foto || "";
         }
 
+        salvarProdutoFinal(nome, descricao, preco, estoque, categoria, destaque, promocao, promocaoDia, ativo, fotoAntiga, editandoIndex);
+    }
+}
 
 function redimensionarFoto(arquivo, callback){
     var leitor = new FileReader();
@@ -190,10 +181,6 @@ function redimensionarFoto(arquivo, callback){
 
     leitor.readAsDataURL(arquivo);
 }
-        salvarProdutoFinal(nome, descricao, preco, estoque, categoria, destaque, promocao, promocaoDia, ativo, fotoAntiga, editandoIndex);
-    }
-}
-
 function salvarProdutoFinal(nome, descricao, preco, estoque, categoria, destaque, promocao, promocaoDia, ativo, foto, editandoIndex){
         const produto = {
         nome: nome,
