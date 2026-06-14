@@ -39,156 +39,226 @@ button{
 .imprimir{
     background:#16a34a;
 }
-
-.limpar{
-    background:#dc2626;
-}
 </style>
 </head>
 
 <body>
 
 <h1>📊 Relatórios SweetCake</h1>
+
 <button class="imprimir" onclick="imprimirRelatorio()">🖨️ Imprimir Relatório</button>
-<button class="limpar" onclick="limparPedidos()">🗑️ Limpar Pedidos do Dia</button>
 
 <hr>
 
-<div id="resumoRelatorio"></div>
+<div id="resumoRelatorio">Carregando relatório...</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <script>
-var pedidos = JSON.parse(localStorage.getItem("pedidosSweetCake")) || [];
+const firebaseConfig = {
+  apiKey: "AIzaSyAR_Cs8eI54zyfFfDKU4tneY6sYs5KOwWU",
+  authDomain: "sweetcake-cardapio.firebaseapp.com",
+  projectId: "sweetcake-cardapio",
+  storageBucket: "sweetcake-cardapio.firebasestorage.app",
+  messagingSenderId: "69352116515",
+  appId: "1:69352116515:web:c02c6d3a5df9e6d9c4bc96"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 function moeda(valor){
-    return valor.toFixed(2).replace(".", ",");
+    return Number(valor || 0).toFixed(2).replace(".", ",");
+}
+
+function numeroPedido(valor){
+    return Number(String(valor || "0").replace(",", "."));
 }
 
 function carregarRelatorio(){
     var resumo = document.getElementById("resumoRelatorio");
 
-    var totalPedidos = pedidos.length;
-    var totalRecebido = 0;
-    var totalCancelado = 0;
+    db.collection("pedidos").get().then(function(snapshot){
+        var pedidos = [];
 
-    var pix = 0;
-    var cartao = 0;
-    var dinheiro = 0;
+        snapshot.forEach(function(doc){
+            var pedido = doc.data();
+            pedidos.push(pedido);
+        });
 
-    var recebidos = 0;
+        montarRelatorio(pedidos);
+    }).catch(function(error){
+        resumo.innerHTML = "<p>Erro ao carregar relatório: " + error.message + "</p>";
+    });
+}
+
+function montarRelatorio(pedidos){
+    var resumo = document.getElementById("resumoRelatorio");
+
+    var hoje = new Date().toLocaleDateString("pt-BR");
+    var mesAtual = hoje.split("/")[1] + "/" + hoje.split("/")[2];
+
+    var pedidosHoje = 0;
+    var pedidosMes = 0;
+
+    var totalHoje = 0;
+    var totalMes = 0;
+
+    var pixHoje = 0;
+    var cartaoHoje = 0;
+    var dinheiroHoje = 0;
+
+    var clientesHoje = {};
+    var clientesMes = {};
+
     var produtosVendidos = {};
-    var preparando = 0;
-    var entregue = 0;
-    var cancelado = 0;
+    var clientesFrequentes = {};
+
+    var canceladosHoje = 0;
+    var canceladosMes = 0;
 
     for(var i = 0; i < pedidos.length; i++){
         var pedido = pedidos[i];
-if(pedido.itens){
-    for(var j = 0; j < pedido.itens.length; j++){
-        var item = pedido.itens[j];
 
-        if(!produtosVendidos[item.nome]){
-            produtosVendidos[item.nome] = 0;
+        var dataPedido = pedido.data || "";
+        var mesPedido = dataPedido.split("/")[1] + "/" + dataPedido.split("/")[2];
+
+        var total = numeroPedido(pedido.total);
+        var telefone = String(pedido.telefone || "").replace(/\D/g,"");
+        var nomeCliente = pedido.nome || "Cliente sem nome";
+
+        if(!clientesFrequentes[nomeCliente]){
+            clientesFrequentes[nomeCliente] = 0;
         }
+        clientesFrequentes[nomeCliente]++;
 
-        produtosVendidos[item.nome] += Number(item.quantidade);
-    }
-}
-
-        var total = Number(String(pedido.total).replace(",", "."));
-
-        if(pedido.status === "Cancelado"){
-            totalCancelado += total;
-            cancelado++;
-            continue;
-        }
-
-        totalRecebido += total;
-
-        if(pedido.pagamento === "Pix"){
-            pix += total;
-        }
-
-        if(pedido.pagamento === "Cartão"){
-            cartao += total;
-        }
         if(pedido.itens){
-         for(var j = 0; j < pedido.itens.length; j++){
-        var item = pedido.itens[j];
+            for(var j = 0; j < pedido.itens.length; j++){
+                var item = pedido.itens[j];
 
-        if(!produtosVendidos[item.nome]){
-            produtosVendidos[item.nome] = 0;
+                if(!produtosVendidos[item.nome]){
+                    produtosVendidos[item.nome] = 0;
+                }
+
+                produtosVendidos[item.nome] += Number(item.quantidade || 0);
+            }
         }
 
-        produtosVendidos[item.nome] += Number(item.quantidade);
+        if(dataPedido === hoje){
+            pedidosHoje++;
+
+            if(telefone !== ""){
+                clientesHoje[telefone] = true;
+            }
+
+            if(pedido.status === "Cancelado"){
+                canceladosHoje++;
+            }else{
+                totalHoje += total;
+
+                if(pedido.pagamento === "Pix"){
+                    pixHoje += total;
+                }
+
+                if(pedido.pagamento === "Cartão"){
+                    cartaoHoje += total;
+                }
+
+                if(pedido.pagamento === "Dinheiro"){
+                    dinheiroHoje += total;
+                }
+            }
+        }
+
+        if(mesPedido === mesAtual){
+            pedidosMes++;
+
+            if(telefone !== ""){
+                clientesMes[telefone] = true;
+            }
+
+            if(pedido.status === "Cancelado"){
+                canceladosMes++;
+            }else{
+                totalMes += total;
+            }
+        }
     }
-}
-        if(pedido.pagamento === "Dinheiro"){
-            dinheiro += total;
-        }
 
-        if(pedido.status === "Recebido"){
-            recebidos++;
-        }
+    var clientesUnicosHoje = Object.keys(clientesHoje).length;
+    var clientesUnicosMes = Object.keys(clientesMes).length;
 
-        if(pedido.status === "Preparando"){
-            preparando++;
-        }
+    var ticketMedioHoje = pedidosHoje > 0 ? totalHoje / pedidosHoje : 0;
+    var ticketMedioMes = pedidosMes > 0 ? totalMes / pedidosMes : 0;
 
-        if(pedido.status === "Entregue"){
-            entregue++;
-        }
-    }
-
-    resumo.innerHTML =
+    var html =
         "<div class='card'>" +
-        "<h2>Resumo do Dia</h2>" +
-        "<p><b>Total de pedidos:</b> " + totalPedidos + "</p>" +
-        "<p><b>Total recebido:</b> R$ " + moeda(totalRecebido) + "</p>" +
-        "<p><b>Total cancelado:</b> R$ " + moeda(totalCancelado) + "</p>" +
+        "<h2>Resumo de Hoje</h2>" +
+        "<p><b>Data:</b> " + hoje + "</p>" +
+        "<p><b>Pedidos:</b> " + pedidosHoje + "</p>" +
+        "<p><b>Clientes únicos:</b> " + clientesUnicosHoje + "</p>" +
+        "<p><b>Faturamento:</b> R$ " + moeda(totalHoje) + "</p>" +
+        "<p><b>Ticket médio:</b> R$ " + moeda(ticketMedioHoje) + "</p>" +
+        "<p><b>Cancelados:</b> " + canceladosHoje + "</p>" +
         "</div>" +
 
         "<div class='card'>" +
-        "<h2>Por Forma de Pagamento</h2>" +
-        "<p><b>Pix:</b> R$ " + moeda(pix) + "</p>" +
-        "<p><b>Cartão:</b> R$ " + moeda(cartao) + "</p>" +
-        "<p><b>Dinheiro:</b> R$ " + moeda(dinheiro) + "</p>" +
+        "<h2>Pagamento de Hoje</h2>" +
+        "<p><b>Pix:</b> R$ " + moeda(pixHoje) + "</p>" +
+        "<p><b>Cartão:</b> R$ " + moeda(cartaoHoje) + "</p>" +
+        "<p><b>Dinheiro:</b> R$ " + moeda(dinheiroHoje) + "</p>" +
         "</div>" +
 
         "<div class='card'>" +
-        "<h2>Status dos Pedidos</h2>"+
-        "<p><b>Recebidos:</b> " + recebidos + "</p>" +
-        "<p><b>Preparando:</b> " + preparando + "</p>" +
-        "<p><b>Entregues:</b> " + entregue + "</p>" +
-        "<p><b>Cancelados:</b> " + cancelado + "</p>" +
+        "<h2>Resumo do Mês</h2>" +
+        "<p><b>Mês:</b> " + mesAtual + "</p>" +
+        "<p><b>Pedidos:</b> " + pedidosMes + "</p>" +
+        "<p><b>Clientes únicos:</b> " + clientesUnicosMes + "</p>" +
+        "<p><b>Faturamento:</b> R$ " + moeda(totalMes) + "</p>" +
+        "<p><b>Ticket médio:</b> R$ " + moeda(ticketMedioMes) + "</p>" +
+        "<p><b>Cancelados:</b> " + canceladosMes + "</p>" +
         "</div>";
-var htmlProdutos = "<div class='card'><h2>Produtos Mais Vendidos</h2>";
 
-for(var nomeProduto in produtosVendidos){
-    htmlProdutos += "<p><b>" + nomeProduto + ":</b> " + produtosVendidos[nomeProduto] + " unidade(s)</p>";
+    html += montarRanking("Produtos Mais Vendidos", produtosVendidos, "unidade(s)");
+    html += montarRanking("Clientes Mais Frequentes", clientesFrequentes, "pedido(s)");
+
+    resumo.innerHTML = html;
 }
 
-htmlProdutos += "</div>";
+function montarRanking(titulo, objeto, texto){
+    var lista = [];
 
-resumo.innerHTML += htmlProdutos;
+    for(var nome in objeto){
+        lista.push({
+            nome: nome,
+            quantidade: objeto[nome]
+        });
+    }
+
+    lista.sort(function(a, b){
+        return b.quantidade - a.quantidade;
+    });
+
+    var html = "<div class='card'><h2>" + titulo + "</h2>";
+
+    if(lista.length === 0){
+        html += "<p>Nenhum dado ainda.</p>";
+    }else{
+        for(var i = 0; i < lista.length && i < 10; i++){
+            html += "<p><b>" + (i + 1) + "º " + lista[i].nome + ":</b> " + lista[i].quantidade + " " + texto + "</p>";
+        }
+    }
+
+    html += "</div>";
+
+    return html;
 }
 
 function imprimirRelatorio(){
-
     document.querySelector(".imprimir").style.display = "none";
-    document.querySelector(".limpar").style.display = "none";
-
     window.print();
-
     document.querySelector(".imprimir").style.display = "inline-block";
-    document.querySelector(".limpar").style.display = "inline-block";
-}
-
-function limparPedidos(){
-    if(confirm("Tem certeza que deseja limpar todos os pedidos do dia?")){
-        localStorage.removeItem("pedidosSweetCake");
-        alert("Pedidos limpos com sucesso!");
-        location.reload();
-    }
 }
 
 carregarRelatorio();
