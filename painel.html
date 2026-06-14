@@ -86,6 +86,22 @@ iframe{
     <iframe id="telaSistema" src="pedidos.html"></iframe>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAR_Cs8eI54zyfFfDKU4tneY6sYs5KOwWU",
+  authDomain: "sweetcake-cardapio.firebaseapp.com",
+  projectId: "sweetcake-cardapio",
+  storageBucket: "sweetcake-cardapio.firebasestorage.app",
+  messagingSenderId: "69352116515",
+  appId: "1:69352116515:web:c02c6d3a5df9e6d9c4bc96"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+</script>
 <script>
 var pedidosAnterior = JSON.parse(localStorage.getItem("pedidosSweetCake")) || [];
 var quantidadePedidosAnterior = pedidosAnterior.length;
