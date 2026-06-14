@@ -74,6 +74,13 @@ iframe{
 <button onclick="abrirTela('index.html')">🛍️ Ver Cardápio</button>
 <button onclick="abrirTela('admin.html#statusLoja')">🕒 Status da Loja</button>
 <button onclick="abrirTela('admin.html#backup')">💾 Backup</button>
+<select id="statusRapido">
+    <option value="automatico">Automático</option>
+    <option value="aberto">Aberto</option>
+    <option value="fechado">Fechado</option>
+</select>
+
+<button onclick="salvarStatusRapido()">🕒 Alterar Status</button>
 </div>
 
 <div class="tela">
@@ -136,7 +143,13 @@ function verificarNovoPedidoPainel(){
         tocarSomPedido();
     }
 }
+function salvarStatusRapido(){
+    var status = document.getElementById("statusRapido").value;
 
+    localStorage.setItem("statusLojaSweetCake", status);
+
+    alert("Status alterado!");
+}
 setInterval(verificarNovoPedidoPainel, 3000);
 </script>
 
