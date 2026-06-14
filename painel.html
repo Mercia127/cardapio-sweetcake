@@ -145,8 +145,7 @@ function salvarStatusRapido(){
     }).then(function(){
         alert("Status da loja alterado!");
 
-        var iframe = document.getElementById("telaSistema");
-        iframe.src = iframe.src;
+        abrirTela("index.html");
     }).catch(function(error){
         alert("Erro ao alterar status: " + error.message);
     });
