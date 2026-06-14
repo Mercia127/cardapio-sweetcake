@@ -92,7 +92,7 @@ button{
 <div id="listaProdutos"></div>
 <hr>
 
-<h2>🕒 Status da Loja</h2>
+<h2 id="statusLoja">🕒 Status da Loja</h2>
 
 <select id="controleStatusLoja">
     <option value="automatico">Automático</option>
@@ -103,13 +103,13 @@ button{
 <button onclick="salvarStatusLoja()">Salvar Status</button>
 
 <br><br>
-
+<div id="backup">
 <button onclick="exportarBackup()">📥 Fazer Backup</button>
 
 <input type="file" id="arquivoBackup" accept=".json">
 
 <button onclick="importarBackup()">📤 Restaurar Backup</button>
-
+</div>
 <hr>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
