@@ -412,13 +412,28 @@ var statusLoja = document.getElementById("statusLoja").innerText;
 
     texto += "%0ATotal: R$ " + totalPedido.toFixed(2).replace(".", ",");
 
-    var pedidos = JSON.parse(localStorage.getItem("pedidosSweetCake")) || [];
+   var hoje = new Date().toLocaleDateString("pt-BR");
+
+db.collection("pedidos")
+.where("data", "==", hoje)
+.get()
+.then(function(snapshot){
+
+    var numeroDoDia = snapshot.size + 1;
+
+    var pedidosCliente = 1;
+
+    snapshot.forEach(function(doc){
+        var p = doc.data();
+
+        if(String(p.telefone || "").replace(/\D/g,'') === String(telefone || "").replace(/\D/g,'')){
+            pedidosCliente++;
+        }
+    });
 
     var novoPedido = {
-    numero: pedidos.length + 1,
-    pedidosCliente: pedidos.filter(function(p){
-        return p.telefone === telefone;
-    }).length + 1,
+        numero: numeroDoDia,
+        pedidosCliente: pedidosCliente,
     horario: new Date().toLocaleTimeString("pt-BR", {
         hour: "2-digit",
         minute: "2-digit"
@@ -445,10 +460,7 @@ data: new Date().toLocaleDateString("pt-BR"),
         });
     }
 
-   pedidos.push(novoPedido);
-
-localStorage.setItem("pedidosSweetCake", JSON.stringify(pedidos));
-
+  
 db.collection("pedidos").add(novoPedido)
 .then(function(){
     alert("Pedido salvo no painel e enviado!");
@@ -456,6 +468,8 @@ db.collection("pedidos").add(novoPedido)
 .catch(function(error){
     alert("Erro ao salvar pedido no painel: " + error.message);
     console.log("ERRO FIREBASE PEDIDO:", error);
+});
+
 });
 for(var i = 0; i < carrinho.length; i++){
     for(var j = 0; j < produtos.length; j++){
