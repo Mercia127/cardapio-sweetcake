@@ -85,7 +85,15 @@ const db = firebase.firestore();
 <script>
 var pedidos = [];
 var quantidadePedidosAnterior = 0;
+function textoClienteRecorrente(numero){
+    numero = Number(numero || 1);
 
+    if(numero <= 1){
+        return "Primeira compra";
+    }
+
+    return numero + "ª compra";
+}
 function carregarPedidos(){
     var lista = document.getElementById("listaPedidos");
     lista.innerHTML = "";
@@ -104,7 +112,7 @@ function carregarPedidos(){
             "<p><b>Data:</b> " + (pedido.data || "") + "</p>" +
             "<p><b>Horário:</b> " + (pedido.horario || "") + "</p>" +
             "<p><b>Cliente:</b> " + (pedido.nome || "") + "</p>" +
-            "<p><b>Pedido do cliente:</b> #" + (pedido.pedidosCliente || 1) + "</p>" +
+            "<p><b>Cliente recorrente:</b> " + textoClienteRecorrente(pedido.pedidosCliente || 1) + "</p>" +
             "<p><b>Telefone:</b> " + (pedido.telefone || "") + "</p>" +
             "<p><b>Tipo:</b> " + (pedido.tipoEntrega || "") + "</p>" +
             "<p><b>Endereço:</b> " + (pedido.endereco || "") + "</p>" +
