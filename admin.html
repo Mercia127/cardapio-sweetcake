@@ -102,6 +102,14 @@ button{
 
 <button onclick="salvarStatusLoja()">Salvar Status</button>
 
+<br><br>
+
+<button onclick="exportarBackup()">📥 Fazer Backup</button>
+
+<input type="file" id="arquivoBackup" accept=".json">
+
+<button onclick="importarBackup()">📤 Restaurar Backup</button>
+
 <hr>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -306,7 +314,46 @@ function salvarProdutosFirebase(){
         lista: produtos
     });
 }
+function exportarBackup(){
+    const dados = JSON.stringify(produtos, null, 2);
 
+    const blob = new Blob([dados], {
+        type: "application/json"
+    });
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "backup-sweetcake.json";
+    link.click();
+}
+
+function importarBackup(event){
+    const arquivo = event.target.files[0];
+
+    if(!arquivo) return;
+
+    const leitor = new FileReader();
+
+    leitor.onload = function(e){
+        try{
+            produtos = JSON.parse(e.target.result);
+
+            localStorage.setItem(
+                "produtosSweetCake",
+                JSON.stringify(produtos)
+            );
+
+            salvarProdutosFirebase();
+            atualizarLista();
+
+            alert("Backup importado com sucesso!");
+        }catch{
+            alert("Arquivo inválido.");
+        }
+    };
+
+    leitor.readAsText(arquivo);
+}
 db.collection("sistema").doc("produtos").get().then(function(doc){
     if(doc.exists){
         produtos = doc.data().lista || [];
@@ -319,6 +366,58 @@ db.collection("sistema").doc("produtos").get().then(function(doc){
     }
 });
 
+function exportarBackup(){
+    const dados = {
+        produtos: produtos,
+        data: new Date().toLocaleString()
+    };
+
+    const blob = new Blob(
+        [JSON.stringify(dados, null, 2)],
+        {type:"application/json"}
+    );
+
+    const link = document.createElement("a");
+
+    link.href = URL.createObjectURL(blob);
+    link.download = "backup-sweetcake.json";
+
+    link.click();
+
+    alert("Backup criado com sucesso!");
+}
+
+function importarBackup(){
+    const arquivo =
+        document.getElementById("arquivoBackup").files[0];
+
+    if(!arquivo){
+        alert("Selecione um arquivo de backup.");
+        return;
+    }
+
+    const leitor = new FileReader();
+
+    leitor.onload = function(event){
+
+        const dados = JSON.parse(event.target.result);
+
+        produtos = dados.produtos || [];
+
+        localStorage.setItem(
+            "produtosSweetCake",
+            JSON.stringify(produtos)
+        );
+
+        salvarProdutosFirebase();
+
+        atualizarLista();
+
+        alert("Backup restaurado com sucesso!");
+    };
+
+    leitor.readAsText(arquivo);
+}
 atualizarLista();
 </script>
 
