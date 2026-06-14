@@ -141,20 +141,55 @@ function salvarProduto(){
     }
 
     if(fotoInput.files.length > 0){
-        const leitor = new FileReader();
-
-        leitor.onload = function(event){
-            salvarProdutoFinal(nome, descricao, preco, estoque, categoria, destaque, promocao, promocaoDia, ativo, event.target.result, editandoIndex);
-        };
-
-        leitor.readAsDataURL(fotoInput.files[0]);
-    }else{
+        redimensionarFoto(fotoInput.files[0], function(fotoReduzida){
+    salvarProdutoFinal(
+        nome,
+        descricao,
+        preco,
+        estoque,
+        categoria,
+        destaque,
+        promocao,
+        promocaoDia,
+        ativo,
+        fotoReduzida,
+        editandoIndex
+     );
+  });
+}else{
         let fotoAntiga = "";
 
         if(editandoIndex !== ""){
             fotoAntiga = produtos[editandoIndex].foto || "";
         }
 
+
+function redimensionarFoto(arquivo, callback){
+    var leitor = new FileReader();
+
+    leitor.onload = function(event){
+        var img = new Image();
+
+        img.onload = function(){
+            var canvas = document.createElement("canvas");
+
+            var largura = 500;
+            var altura = (img.height * largura) / img.width;
+
+            canvas.width = largura;
+            canvas.height = altura;
+
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, largura, altura);
+
+            callback(canvas.toDataURL("image/jpeg", 0.7));
+        };
+
+        img.src = event.target.result;
+    };
+
+    leitor.readAsDataURL(arquivo);
+}
         salvarProdutoFinal(nome, descricao, preco, estoque, categoria, destaque, promocao, promocaoDia, ativo, fotoAntiga, editandoIndex);
     }
 }
