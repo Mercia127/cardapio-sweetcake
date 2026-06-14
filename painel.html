@@ -102,34 +102,29 @@ function abrirPedidos(){
 }
 
 function tocarSomPedido(){
+    var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    var audio = new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg");
-    audio.volume = 1;
-    audio.play().catch(function(){});
+    function bip(tempo){
+        setTimeout(function(){
+            var oscillator = audioCtx.createOscillator();
+            var gainNode = audioCtx.createGain();
 
-    setTimeout(function(){
-        var fala1 = new SpeechSynthesisUtterance("Um Novo pedido Chegou, Verifique Painel");
-        fala1.lang = "pt-BR";
-        fala1.volume = 1;
-        fala1.rate = 0.9;
-        speechSynthesis.speak(fala1);
-    }, 800);
+            oscillator.type = "square";
+            oscillator.frequency.value = 900;
 
-    setTimeout(function(){
-        var fala2 = new SpeechSynthesisUtterance("Um Novo pedido Chegou, Verifique Painel");
-        fala2.lang = "pt-BR";
-        fala2.volume = 1;
-        fala2.rate = 0.9;
-        speechSynthesis.speak(fala2);
-    }, 2800);
+            gainNode.gain.value = 1;
 
-    setTimeout(function(){
-        var fala3 = new SpeechSynthesisUtterance("Um Novo pedido Chegou, Verifique Painel");
-        fala3.lang = "pt-BR";
-        fala3.volume = 1;
-        fala3.rate = 0.9;
-        speechSynthesis.speak(fala3);
-    }, 4800);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.25);
+        }, tempo);
+    }
+
+    bip(0);
+    bip(400);
+    bip(800);
 }
 function verificarNovoPedidoPainel(){
     var pedidosAtualizados = JSON.parse(localStorage.getItem("pedidosSweetCake")) || [];

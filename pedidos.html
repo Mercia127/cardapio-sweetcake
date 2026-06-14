@@ -59,6 +59,7 @@ onkeyup="filtrarTelefone()"
 style="width:300px;padding:10px;margin:10px 0;border-radius:8px;border:1px solid #ccc;">
 
 <button onclick="window.location.href='index.html'">Voltar para o Cardápio</button>
+<button class="cancelar" onclick="zerarPedidosDoDia()">🗑️ Zerar Pedidos do Dia</button>
 
 <hr>
 
@@ -268,6 +269,29 @@ db.collection("pedidos").onSnapshot(function(snapshot){
 
     console.log("Pedidos atualizados:", pedidos.length);
 });
+
+function zerarPedidosDoDia(){
+    if(!confirm("Tem certeza que deseja apagar todos os pedidos do painel?")){
+        return;
+    }
+
+    db.collection("pedidos").get().then(function(snapshot){
+        var batch = db.batch();
+
+        snapshot.forEach(function(doc){
+            batch.delete(doc.ref);
+        });
+
+        return batch.commit();
+    }).then(function(){
+        localStorage.removeItem("pedidosSweetCake");
+        pedidos = [];
+        carregarPedidos();
+        alert("Pedidos do dia zerados com sucesso!");
+    }).catch(function(error){
+        alert("Erro ao zerar pedidos: " + error.message);
+    });
+}
 </script>
 
 </body>
