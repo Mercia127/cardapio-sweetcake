@@ -80,6 +80,7 @@ iframe{
 </select>
 
 <button onclick="salvarStatusRapido()">🕒 Alterar Status</button>
+<button onclick="ativarSom()">🔊 Ativar Som</button>
 </div>
 
 <div class="tela">
@@ -165,6 +166,31 @@ function salvarStatusRapido(){
     }).catch(function(error){
         alert("Erro ao alterar status: " + error.message);
     });
+}
+var somAtivado = false;
+
+function ativarSom(){
+    somAtivado = true;
+    tocarSomPedido();
+    alert("Som ativado! Agora os novos pedidos vão tocar.");
+}
+
+function tocarSomPedido(){
+    if(!somAtivado){
+        return;
+    }
+
+    function bip(tempo){
+        setTimeout(function(){
+            var audio = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+            audio.volume = 1;
+            audio.play();
+        }, tempo);
+    }
+
+    bip(0);
+    bip(500);
+    bip(1000);
 }
 setInterval(verificarNovoPedidoPainel, 3000);
 </script>
