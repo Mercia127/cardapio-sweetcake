@@ -72,7 +72,6 @@ iframe{
 <button onclick="abrirTela('admin.html')">📦 Produtos / Admin</button>
 <button onclick="abrirTela('relatorios.html')">📊 Relatórios</button>
 <button onclick="abrirTela('index.html')">🛍️ Ver Cardápio</button>
-<button onclick="abrirTela('admin.html#statusLoja')">🕒 Status da Loja</button>
 <button onclick="abrirTela('admin.html#backup')">💾 Backup</button>
 <select id="statusRapido">
     <option value="automatico">Automático</option>
@@ -141,9 +140,16 @@ function verificarNovoPedidoPainel(){
 function salvarStatusRapido(){
     var status = document.getElementById("statusRapido").value;
 
-    localStorage.setItem("statusLojaSweetCake", status);
+    db.collection("sistema").doc("statusLoja").set({
+        status: status
+    }).then(function(){
+        alert("Status da loja alterado!");
 
-    alert("Status alterado!");
+        var iframe = document.getElementById("telaSistema");
+        iframe.src = iframe.src;
+    }).catch(function(error){
+        alert("Erro ao alterar status: " + error.message);
+    });
 }
 setInterval(verificarNovoPedidoPainel, 3000);
 </script>
